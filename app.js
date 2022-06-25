@@ -1,5 +1,5 @@
 const secret = require('./secret.json'); //file with your bot credentials/token/etc
-const discordTTS=require("discord-tts");
+const discordTTS=require("./tts");
 const {Client, Intents} = require("discord.js");
 const {AudioPlayer, createAudioResource, StreamType, entersState, VoiceConnectionStatus, joinVoiceChannel} = require("@discordjs/voice");
 
@@ -22,7 +22,7 @@ let audioPlayer=new AudioPlayer();
 client.on("messageCreate", async (msg)=>{
     if(msg.content=="tts")
     {
-        const stream=discordTTS.getVoiceStream("hello text to speech world");
+        const stream=discordTTS.getVoiceStream("hallo adsfdas");
         const audioResource=createAudioResource(stream, {inputType: StreamType.Arbitrary, inlineVolume:true});
         if(!voiceConnection || voiceConnection?.status===VoiceConnectionStatus.Disconnected){
             voiceConnection = joinVoiceChannel({
