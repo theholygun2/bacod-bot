@@ -19,51 +19,41 @@ client.on("ready", () => console.log("Online"));
 let voiceConnection;
 let audioPlayer=new AudioPlayer();
 
-function chunkSubstr(str, size) {
-    const numChunks = Math.ceil(str.length / size)
-    const chunks = new Array(numChunks)
-    for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
-      chunks[i] = str.substr(o, size)
-    }
-    return chunks
-}
-
-function playNextResource(){
-    if (audioStreams.length > 0) {return audioPlayer.play(createAudioResource(audioStreams.shift(), {inputType: StreamType.Arbitrary, inlineVolume:true}));}
-      connection = getVoiceConnection(gameInfo.guild.id);
-      connection.destroy();
-  }
-
 client.on("messageCreate", async (msg)=>{
-    if(!msg.content.startsWith('` ')) return
+    if(!msg.content.startsWith("' ")) return
+    if(!msg.member.voice.channelId) return msg.reply("Tolong join dahulu ke dalam voice channel ^^ (╯ ͡❛ ͜ʖ ͡❛)╯┻━┻")
     let text = msg.content.substring(2)
     if(text === 'stop ajg') return audioPlayer.stop(true)
-    console.log(text)
-    console.log(text.length)
     if(text.length > 200) {
         return
     }
-
+    console.log(audioPlayer.state.status)
     if(audioPlayer.state.status==="idle")
     {
+        console.log('audio is idle')
         try {
             const stream=discordTTS.getVoiceStream(text);
             const audioResource=createAudioResource(stream, {inputType: StreamType.Arbitrary, inlineVolume:true});
-        if(!voiceConnection || voiceConnection?.status===VoiceConnectionStatus.Disconnected){
+            
+            if(voiceConnection) console.log(`vc.state.status: ${voiceConnection.state.status}`)
+            if(!voiceConnection || voiceConnection?.status===VoiceConnectionStatus.Disconnected){
             voiceConnection = joinVoiceChannel({
                 channelId: msg.member.voice.channelId,
                 guildId: msg.guildId,
                 adapterCreator: msg.guild.voiceAdapterCreator,
             });
             voiceConnection=await entersState(voiceConnection, VoiceConnectionStatus.Connecting, 5_000);
+            console.log(voiceConnection.state)
         }
-        
         if(voiceConnection.status===VoiceConnectionStatus.Connected){
+            console.log(voiceConnection.status)
+            //console.log(voiceConnection)
+            console.log(msg.member.voice.channelId)
             voiceConnection.subscribe(audioPlayer);
             audioPlayer.play(audioResource);
         }            
         } catch (error) {
-            console.log('error')
+            console.log(error)
             return audioPlayer.stop({force: true})
         }
     }
