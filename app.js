@@ -20,14 +20,15 @@ let voiceConnection;
 let audioPlayer=new AudioPlayer();
 
 client.on("messageCreate", async (msg)=>{
-    if(!msg.content.startsWith("' ")) return
+    if(!msg.content.startsWith("' ") || msg.author.bot ) return
     if(!msg.member.voice.channelId) return msg.reply("Tolong join dahulu ke dalam voice channel ^^ (╯ ͡❛ ͜ʖ ͡❛)╯┻━┻")
+    const regex = /<@[0-9]+>/
     let text = msg.content.substring(2)
-    if(text === 'stop ajg') return audioPlayer.stop(true)
+    text = text.replace(regex, " ")
     if(text.length > 200) {
         return
     }
-    console.log(audioPlayer.state.status)
+    //console.log(audioPlayer.state.status)
     if(audioPlayer.state.status==="idle")
     {
         console.log('audio is idle')
@@ -35,7 +36,7 @@ client.on("messageCreate", async (msg)=>{
             const stream=discordTTS.getVoiceStream(text);
             const audioResource=createAudioResource(stream, {inputType: StreamType.Arbitrary, inlineVolume:true});
             
-            if(voiceConnection) console.log(`vc.state.status: ${voiceConnection.state.status}`)
+            if(voiceConnection) console.log(`vc.state.status: not null and ${voiceConnection.state.status}`)
             if(!voiceConnection || voiceConnection?.status===VoiceConnectionStatus.Disconnected){
             voiceConnection = joinVoiceChannel({
                 channelId: msg.member.voice.channelId,
@@ -43,12 +44,10 @@ client.on("messageCreate", async (msg)=>{
                 adapterCreator: msg.guild.voiceAdapterCreator,
             });
             voiceConnection=await entersState(voiceConnection, VoiceConnectionStatus.Connecting, 5_000);
-            console.log(voiceConnection.state)
+            //console.log(`voice connection status: ${voiceConnection.state.status}`)
         }
         if(voiceConnection.status===VoiceConnectionStatus.Connected){
-            console.log(voiceConnection.status)
-            //console.log(voiceConnection)
-            console.log(msg.member.voice.channelId)
+            //console.log(voiceConnection?.status===VoiceConnectionStatus.Connected)
             voiceConnection.subscribe(audioPlayer);
             audioPlayer.play(audioResource);
         }            
@@ -56,5 +55,30 @@ client.on("messageCreate", async (msg)=>{
             console.log(error)
             return audioPlayer.stop({force: true})
         }
+    }
+});
+
+client.on('voiceStateUpdate', (oldState, newState) => {
+  
+    // Represents a mute/deafen update
+    if(oldState.channelId === newState.chanelId) return console.log('Mute/Deafen Update');
+  
+    // Some connection
+    if(!oldState.channelId && newState.channelId) return console.log('Connection Update');
+  
+    // Disconnection
+    if(oldState.channelId && !newState.channelId){
+      console.log('Disconnection Update');
+      // Bot was disconnected?
+      //console.log(newState.id)
+      //console.log(oldState.id)
+      if(newState.id === client.user.id) {
+        voiceConnection = null 
+        audioPlayer.stop({force: true})
+        return 
+      }
+
+    //   if (newState.member.user !== newState.member.user) member.voice.setMute(false)
+
     }
 });
