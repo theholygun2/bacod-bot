@@ -90,7 +90,7 @@ const toolRetry = toolRetryMiddleware({
 // =======================
 // LIMITS
 // =======================
-const modelCallLimit = modelCallLimitMiddleware({ threadLimit: 10, runLimit: 5, exitBehavior: "end",});
+const modelCallLimit = modelCallLimitMiddleware({ threadLimit: 20, runLimit: 5, exitBehavior: "end",});
 const toolCallLimit = toolCallLimitMiddleware({ toolName: "execute_sql_query", runLimit: 5, threadLimit: 40, exitBehavior: "error", });
 
 // =======================

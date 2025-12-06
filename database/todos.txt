@@ -1,0 +1,4 @@
+- Get a different DB with greater size table or data and diffrent domain
+- test it
+- logging
+- integrate with web

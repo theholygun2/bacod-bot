@@ -2,6 +2,7 @@ import { ReadLine } from "readline";
 import { randomUUID } from "node:crypto";
 import readline from "node:readline"
 import { agent } from "./agent"
+import { getSchema } from "./database/connection";
 
 const threadId = randomUUID();
 
@@ -44,6 +45,7 @@ function sanitizeInput(input: string): string {
 
 async function chatLoop() {
   console.log("💬 CLI Chat Started — type 'exit' to quit\n");
+  console.log(getSchema());
 
   while (true) {
     const input = await ask("> ");
